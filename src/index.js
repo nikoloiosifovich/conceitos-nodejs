@@ -11,7 +11,13 @@ app.use(express.json())
 const users = []
 
 function checksExistsUserAccount (request, response, next) {
-  next()
+  const { username } = request.headers
+
+  if (!users.some(user => user.username === username)) {
+    return response.status(404).json({ error: 'User dont exists!' })
+  }
+
+  return next()
 }
 
 app.post('/users', (request, response) => {
@@ -40,10 +46,6 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
 app.post('/todos', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body
   const { username } = request.headers // user autentication
-
-  if (!users.some(user => user.username === username)) {
-    return response.status(404).json({ error: 'Username dont exists!' })
-  }
 
   const todo = {
     id: uuidv4(),
