@@ -49,7 +49,7 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body
-  const { username } = request.headers // user autentication
+  const { user } = request
 
   const todo = {
     id: uuidv4(),
@@ -59,7 +59,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
     created_at: new Date()
   }
 
-  users.find(user => user.username === username).todos.push(todo)
+  user.todos.push(todo)
 
   return response.status(201).json(todo)
 })
