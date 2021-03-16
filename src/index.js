@@ -88,6 +88,10 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
   const { done } = request.query
   const { user } = request
 
+  if (!user.todos.some(todo => todo.id === id)) {
+    return response.status(404).json({ error: 'Unable to update todo!' })
+  }
+
   const todo = user.todos.find(todo => todo.id === id)
 
   todo.done = done !== 'false'
@@ -96,7 +100,14 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
 })
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { id } = request.params
+  const { user } = request
+
+  const todoIndex = user.todos.findIndex(todo => todo.id === id)
+
+  user.todos.splice(todoIndex, 1)
+
+  return response.status(204).send()
 })
 
 module.exports = app
