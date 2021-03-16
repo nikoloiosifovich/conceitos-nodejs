@@ -71,6 +71,10 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body
   const { user } = request
 
+  if (!user.todos.some(todo => todo.id === id)) {
+    return response.status(404).json({ error: 'Unable to update todo!' })
+  }
+
   const todo = user.todos.find(todo => todo.id === id)
 
   todo.title = title
