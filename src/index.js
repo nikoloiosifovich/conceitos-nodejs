@@ -90,7 +90,7 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
 
   const todo = user.todos.find(todo => todo.id === id)
 
-  todo.done = done
+  todo.done = done !== 'false'
 
   return response.json(todo)
 })
