@@ -41,6 +41,10 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body
   const { username } = request.headers // user autentication
 
+  if (!users.some(user => user.username === username)) {
+    return response.status(404).json({ error: 'Username dont exists!' })
+  }
+
   const todo = {
     id: uuidv4(),
     title,
@@ -48,6 +52,8 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
     deadline: new Date(deadline),
     created_at: new Date()
   }
+
+  users.find(user => user.username === username).todos.push(todo)
 
   return response.status(201).json(todo)
 })
