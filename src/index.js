@@ -24,6 +24,24 @@ function checksExistsUserAccount (request, response, next) {
   return next()
 }
 
+function checksExistsUserTodo (request, response, next) {
+  const { user } = request
+  const { id } = request.params
+
+  if (!user.todos.some(todo => todo.id === id)) {
+    return response.status(404).json({ error: 'Todo dont exists!' })
+  }
+
+  const todo = {
+    todo: user.todos.find(todo => todo.id === id),
+    todoIndex: user.todos.findIndex(todo => todo.id === id)
+  }
+
+  request.data = todo
+
+  return next()
+}
+
 app.post('/users', (request, response) => {
   const { name, username } = request.body
 
@@ -66,16 +84,9 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   return response.status(201).json(todo)
 })
 
-app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
-  const { id } = request.params
+app.put('/todos/:id', checksExistsUserAccount, checksExistsUserTodo, (request, response) => {
   const { title, deadline } = request.body
-  const { user } = request
-
-  if (!user.todos.some(todo => todo.id === id)) {
-    return response.status(404).json({ error: 'Unable to update todo!' })
-  }
-
-  const todo = user.todos.find(todo => todo.id === id)
+  const { todo } = request.data
 
   todo.title = title
   todo.deadline = new Date(deadline)
@@ -83,31 +94,18 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   return response.json(todo)
 })
 
-app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  const { id } = request.params
+app.patch('/todos/:id/done', checksExistsUserAccount, checksExistsUserTodo, (request, response) => {
   const { done } = request.query
-  const { user } = request
-
-  if (!user.todos.some(todo => todo.id === id)) {
-    return response.status(404).json({ error: 'Unable to update todo!' })
-  }
-
-  const todo = user.todos.find(todo => todo.id === id)
+  const { todo } = request.data
 
   todo.done = done !== 'false'
 
   return response.json(todo)
 })
 
-app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  const { id } = request.params
+app.delete('/todos/:id', checksExistsUserAccount, checksExistsUserTodo, (request, response) => {
   const { user } = request
-
-  if (!user.todos.some(todo => todo.id === id)) {
-    return response.status(404).json({ error: 'Unable to delete todo!' })
-  }
-
-  const todoIndex = user.todos.findIndex(todo => todo.id === id)
+  const { todoIndex } = request.data
 
   user.todos.splice(todoIndex, 1)
 
